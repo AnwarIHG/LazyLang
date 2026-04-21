@@ -1,0 +1,4 @@
+#ifndef _TABLES_STRING_H
+#define _TABLES_STRING_H
+
+#endif //_TABLES_STRING_H
