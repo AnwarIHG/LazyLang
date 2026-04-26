@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "keywords.h"
+// #include "keywords.h"
 
 Lexer* Lexer_init(const char *file_name) {
     Lexer *lex = (Lexer*)malloc(sizeof(Lexer));
@@ -109,6 +109,15 @@ static void skip_whitespace(Lexer* lexer) {
     }
 }
 
+Token static inline _make_token(TokenKind kind,TokenValue value){
+    return (Token){
+        .kind = kind,
+        .as = value
+    };
+}
+
+#define make_token(K, V) (_make_token(K,(TokenValue){V}))
+
 // --- parse ---
 
 static Token parse_identifier(Lexer* lex) {
@@ -126,77 +135,63 @@ static Token parse_identifier(Lexer* lex) {
         read_next_part(lex);
     }
 
-    return (Token) {
-        .type = TokenKind_IDENTIFIER,
-        .as.litreal_str_ = buf,
-    };
+    return make_token(TokenKind_IDENTIFIER, .litreal_str_ = buf);
 }
 
 static Token parse_number(Lexer* lex) {
-    char c = 0;
     String buf = String_create_empty();
+    // char has_dot = 0;
 
-    while (1) {
-        c = advance(lex); 
+    char c = 0;
+    c = advance(lex); 
+
+    while (isdigit(c)) {
+        buf = String_cat_len(buf, &c,1);
 
         if (c == '.' && isdigit(peek(lex))) {
             buf = String_cat_len(buf, ".",1);
             continue;
         }
 
-        if (isdigit(c)) {
-            buf = String_cat_len(buf, &c,1);
-        } else {
-            break;
+        if (c == '.') {
+            // has_dot = 1;
+
+            while (isdigit(c) && c == '.') {  
+                buf = String_cat_len(buf, ".",1);
+                c = advance(lex);
+            }
         }
 
-        read_next_part(lex);
-    }
-
-    return (Token) {
-        .type = TokenKind_NUMBER,
-        .as.litreal_str_ = buf,
-    };
-}
-
-static Token parse_string_litreal(Lexer* lex) {
-    String buf = String_create_empty();
-    char c = 0;
-
-    while (1) {
         c = advance(lex); 
-
-        if (isalpha(c)) {
-            buf = String_cat_len(buf, &c,1);
-        } else {
-            break;
-        }
-
         read_next_part(lex);
     }
 
-    return (Token) {
-        .type = TokenKind_STRING_LITERAL,
-        .as.litreal_str_ = buf,
-    };
+    return make_token(TokenKind_NUMBER, .litreal_str_ = buf);
 }
+
+// static Token parse_string_litreal(Lexer* lex) {
+//     String buf = String_create_empty();
+//     char c = 0;
+//
+//     while (isalpha(c)) {
+//         c = advance(lex); 
+//
+//         buf = String_cat_len(buf, &c,1);
+//
+//         read_next_part(lex);
+//     }
+//
+//     return make_token(TokenKind_STRING_LITERAL, buf);
+// }
 
 Token Lexer_next_token (Lexer* lex) {
 
-    if (!lex) {
-        return (Token) {
-            .type = TokenKind_EOF,
-            .as.int_ = 0,
-        };
-    }
+    if (!lex) return (Token) make_token(TokenKind_ERROR, .int_ = 0);
 
     skip_whitespace(lex);
 
     if (is_at_end(lex) && lex->file.left == 0) {
-        return (Token) {
-            .type = TokenKind_EOF,
-            .as.int_ = 0,
-        };
+        return make_token(TokenKind_EOF, .int_ = 0);
     }
 
     // char c = *lex->current;
@@ -210,57 +205,35 @@ Token Lexer_next_token (Lexer* lex) {
     switch (peek(lex)) {
         case '.':
             advance(lex);
-            return (Token) {
-                .type = TokenKind_DOT,
-                .as.unknown_ = NULL,
-            };
+            return make_token(TokenKind_DOT, .int_ = 0);
 
         case '|':
             advance(lex);
-            return (Token) {
-                .type = TokenKind_PIPE,
-                .as.unknown_ = NULL,
-            };
+            return make_token(TokenKind_PIPE, .int_ = 0);
 
         case '=':
             if (match(lex, '=')){
-                return (Token) {
-                    .type=TokenKind_EQUAL_EQUAL,
-                    .as.unknown_=NULL
-                };
+                return make_token(TokenKind_EQUAL_EQUAL, .int_ = 0);
             } else if (match(lex,'>')) {
-                return (Token) {
-                    .type=TokenKind_ARROW,
-                    .as.unknown_=NULL
-                };
+                return make_token(TokenKind_ARROW, .int_ = 0);
             }
-
-            return (Token) {
-                .type=TokenKind_EQUAL,
-                .as.unknown_=NULL
-            };
+            return make_token(TokenKind_EQUAL, .int_ = 0);
 
         case '+':
             advance(lex);
-            return (Token) {
-                .type=TokenKind_PLUS,
-                .as.unknown_=NULL
-            };
+            return make_token(TokenKind_PLUS, .int_ = 0);
 
         case '-':
             advance(lex);
-            return (Token) {
-                .type=TokenKind_MINUS,
-                .as.unknown_=NULL
-            };
+            return make_token(TokenKind_MINUS, .int_ = 0);
+
         default:
             printf("[ '%c' | %d ]\n",peek(lex),peek(lex));
             advance(lex);
             break;
     }
 
-    return (Token) {
-        .type = TokenKind_ERROR,
-        .as.int_ = 0,
-    };
+    return (Token) make_token(TokenKind_ERROR, .int_ = 0);
 }
+
+#undef make_token

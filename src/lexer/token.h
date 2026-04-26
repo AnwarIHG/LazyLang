@@ -108,11 +108,11 @@ typedef union {
     String litreal_str_;
     i64 int_;
     f64 float_;
-} Token_value; 
+} TokenValue; 
 
 typedef struct {
-    Token_value as;
-    TokenKind type;
+    TokenValue as;
+    TokenKind kind;
 } Token;
 
 #endif // TOKEN_H

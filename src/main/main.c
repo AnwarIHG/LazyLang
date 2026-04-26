@@ -98,9 +98,9 @@ static int compile(const CompilerConfig* config) {
     Lexer* lex = Lexer_init(config->input_file);
 
     Token tok = {0};
-    while (tok.type != TokenKind_EOF) {
+    while (tok.kind != TokenKind_EOF) {
         tok = Lexer_next_token(lex);
-        switch (tok.type) {
+        switch (tok.kind) {
             case TokenKind_IDENTIFIER:
                 printf("%s\n",tok.as.litreal_str_);
                 String_distroy(tok.as.litreal_str_);

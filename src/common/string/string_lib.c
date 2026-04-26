@@ -860,9 +860,9 @@ void String_range(String s, i64 start, i64 end) {
     }
     newlen = (start > end) ? 0 : (end-start)+1;
     if (newlen != 0) {
-        if (start >= (u64)len) {
+        if (start >= (i64)len) {
             newlen = 0;
-        } else if (end >= (u64)len) {
+        } else if (end >= (i64)len) {
             end = len-1;
             newlen = (end-start)+1;
         }

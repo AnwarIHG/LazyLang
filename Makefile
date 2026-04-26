@@ -1,6 +1,6 @@
 CC = clang
 
-CFLAGS = -Wall -Wextra #-Werror
+CFLAGS = -Wall -Wextra -Werror
 CFLAGS += -ggdb # remove later
 
 EXEC=Lazy
