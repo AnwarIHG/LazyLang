@@ -5,7 +5,7 @@
 #include "main.h"
 #define VERSION "0.1.0"
 
-#include "../lexer/Lexer.h"
+#include "../lexer/lexer.h"
 
 static void print_version(void) {
     printf("Lazy Lang Compiler v%s\n", VERSION);
@@ -98,28 +98,28 @@ static int compile(const CompilerConfig* config) {
     Lexer* lex = Lexer_init(config->input_file);
 
     Token tok = {0};
-    while (tok.type != Token_type_EOF) {
+    while (tok.type != TokenKind_EOF) {
         tok = Lexer_next_token(lex);
         switch (tok.type) {
-            case Token_type_IDENTIFIER:
+            case TokenKind_IDENTIFIER:
                 printf("%s\n",tok.as.litreal_str_);
                 String_distroy(tok.as.litreal_str_);
                 break;
-            case Token_type_NUMBER:
+            case TokenKind_NUMBER:
                 printf("%s\n",tok.as.litreal_str_);
                 String_distroy(tok.as.litreal_str_);
                 break;
-            case Token_type_STRING_LITERAL:
+            case TokenKind_STRING_LITERAL:
                 printf("%s\n",tok.as.litreal_str_);
                 String_distroy(tok.as.litreal_str_);
                 break;
-            case Token_type_DOT:
+            case TokenKind_DOT:
                 // printf(".");
                 break;
-            case Token_type_PIPE:
+            case TokenKind_PIPE:
                 // printf(" | ");
                 break;
-            case Token_type_EOF:
+            case TokenKind_EOF:
                 printf("\n\n\nat the end\n");
                 break;
             default:

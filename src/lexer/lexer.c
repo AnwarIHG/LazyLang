@@ -1,6 +1,5 @@
-#include "Lexer.h"
-#include "Token.h"
-#include "../common/macro.h"
+#include "lexer.h"
+#include "token.h"
 
 #include <endian.h>
 #include <stdlib.h>
@@ -8,56 +7,6 @@
 #include <ctype.h>
 
 #include "keywords.h"
-
-/* 
- * this function will open the file
- * */
-static File File_create(const char* filepath) {
-
-    File file = {0};
-    file.filename = filepath;
-
-    file.c_file = fopen(filepath, "rb");
-
-    // get the file size
-    fseek(file.c_file, 0, SEEK_END);
-    file.size = ftell(file.c_file);
-    file.left = file.size;
-
-    rewind(file.c_file);
-    return file;
-}
-
-static u64 File_read(File* file){
-
-    if (!file->source) { 
-        file->source = (char*)malloc(MIN(file->size, BUFFER_LIMIT) + 1);
-
-        if (!file->source) {
-            fclose(file->c_file);
-            fprintf(stderr, "Error: Memory allocation failed\n");
-            return 0;
-        }
-    }
-
-    u64 bytes_read = 0;
-    if (file->left > 0) {
-        bytes_read = fread(file->source, 1, MIN(file->left, BUFFER_LIMIT), file->c_file);
-
-        file->left -= bytes_read;
-        file->source[bytes_read] = '\0';
-    } else {
-        return bytes_read;
-    }
-
-    return bytes_read;
-}
-
-/* free the allocated memroy for the file*/
-static void File_destroy(File *file) {
-    if (file->c_file) fclose(file->c_file);
-    if (file->source) free(file->source);
-}
 
 Lexer* Lexer_init(const char *file_name) {
     Lexer *lex = (Lexer*)malloc(sizeof(Lexer));
@@ -178,7 +127,7 @@ static Token parse_identifier(Lexer* lex) {
     }
 
     return (Token) {
-        .type = Token_type_IDENTIFIER,
+        .type = TokenKind_IDENTIFIER,
         .as.litreal_str_ = buf,
     };
 }
@@ -205,7 +154,7 @@ static Token parse_number(Lexer* lex) {
     }
 
     return (Token) {
-        .type = Token_type_NUMBER,
+        .type = TokenKind_NUMBER,
         .as.litreal_str_ = buf,
     };
 }
@@ -227,7 +176,7 @@ static Token parse_string_litreal(Lexer* lex) {
     }
 
     return (Token) {
-        .type = Token_type_STRING_LITERAL,
+        .type = TokenKind_STRING_LITERAL,
         .as.litreal_str_ = buf,
     };
 }
@@ -236,7 +185,7 @@ Token Lexer_next_token (Lexer* lex) {
 
     if (!lex) {
         return (Token) {
-            .type = Token_type_EOF,
+            .type = TokenKind_EOF,
             .as.int_ = 0,
         };
     }
@@ -245,7 +194,7 @@ Token Lexer_next_token (Lexer* lex) {
 
     if (is_at_end(lex) && lex->file.left == 0) {
         return (Token) {
-            .type = Token_type_EOF,
+            .type = TokenKind_EOF,
             .as.int_ = 0,
         };
     }
@@ -262,46 +211,46 @@ Token Lexer_next_token (Lexer* lex) {
         case '.':
             advance(lex);
             return (Token) {
-                .type = Token_type_DOT,
+                .type = TokenKind_DOT,
                 .as.unknown_ = NULL,
             };
 
         case '|':
             advance(lex);
             return (Token) {
-                .type = Token_type_PIPE,
+                .type = TokenKind_PIPE,
                 .as.unknown_ = NULL,
             };
 
         case '=':
             if (match(lex, '=')){
                 return (Token) {
-                    .type=Token_type_EQUAL_EQUAL,
+                    .type=TokenKind_EQUAL_EQUAL,
                     .as.unknown_=NULL
                 };
             } else if (match(lex,'>')) {
                 return (Token) {
-                    .type=Token_type_ARROW,
+                    .type=TokenKind_ARROW,
                     .as.unknown_=NULL
                 };
             }
 
             return (Token) {
-                .type=Token_type_EQUAL,
+                .type=TokenKind_EQUAL,
                 .as.unknown_=NULL
             };
 
         case '+':
             advance(lex);
             return (Token) {
-                .type=Token_type_PLUS,
+                .type=TokenKind_PLUS,
                 .as.unknown_=NULL
             };
 
         case '-':
             advance(lex);
             return (Token) {
-                .type=Token_type_MINUS,
+                .type=TokenKind_MINUS,
                 .as.unknown_=NULL
             };
         default:
@@ -311,7 +260,7 @@ Token Lexer_next_token (Lexer* lex) {
     }
 
     return (Token) {
-        .type = Token_type_ERROR,
+        .type = TokenKind_ERROR,
         .as.int_ = 0,
     };
 }
