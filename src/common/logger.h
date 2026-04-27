@@ -25,8 +25,9 @@ typedef enum {
   logSeverity_TRACE = 5,
 } LogSeverity;
 
-b8 log_initialize();
-void log_terminate();
+// TODO: id don't know if i realy need to implement this functions or not
+// b8 log_initialize();
+// void log_terminate();
 
 void log_output(LogSeverity sev, const char *format, ...);
 

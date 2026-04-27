@@ -1,7 +1,7 @@
 #include "lexer.h"
 #include "token.h"
+#include "../common/logger.h"
 
-#include <endian.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -116,7 +116,7 @@ Token static inline _make_token(TokenKind kind,TokenValue value){
     };
 }
 
-#define make_token(K, V) (_make_token(K,(TokenValue){V}))
+#define make_token(kind, value) (_make_token(kind, (TokenValue){value}))
 
 // --- parse ---
 
@@ -186,7 +186,7 @@ static Token parse_number(Lexer* lex) {
 
 Token Lexer_next_token (Lexer* lex) {
 
-    if (!lex) return (Token) make_token(TokenKind_ERROR, .int_ = 0);
+    if (!lex) return make_token(TokenKind_ERROR, .int_ = 0);
 
     skip_whitespace(lex);
 
@@ -203,11 +203,147 @@ Token Lexer_next_token (Lexer* lex) {
     }
 
     switch (peek(lex)) {
+
+        case '~':
+            advance(lex);
+            return make_token(TokenKind_TILDE, .int_ = 0);
+
+        case ')':
+            advance(lex);
+            return make_token(TokenKind_RPAREN, .int_ = 0);
+
+        case '(':
+            advance(lex);
+            return make_token(TokenKind_LPAREN, .int_ = 0);
+
+        case '}':
+            advance(lex);
+            return make_token(TokenKind_RBRACE, .int_ = 0);
+
+        case '{':
+            advance(lex);
+            return make_token(TokenKind_LBRACE, .int_ = 0);
+
+        case ']':
+            advance(lex);
+            return make_token(TokenKind_RBRACKET, .int_ = 0);
+
+        case '[':
+            advance(lex);
+            return make_token(TokenKind_LBRACKET, .int_ = 0);
+
+        case ':':
+            advance(lex);
+            return make_token(TokenKind_COLON, .int_ = 0);
+
+        case ';':
+            advance(lex);
+            return make_token(TokenKind_SEMICOLON, .int_ = 0);
+
+        case ',':
+            advance(lex);
+            return make_token(TokenKind_COMMA, .int_ = 0);
+
+        case '?':
+            advance(lex);
+            return make_token(TokenKind_QUESTION, .int_ = 0);
+
+        case '&':
+            if (match(lex, '=')) {
+                return make_token(TokenKind_AMPERSAND_EQUAL, .int_ = 0);
+            }
+
+            advance(lex);
+            return make_token(TokenKind_AMPERSAND, .int_ = 0);
+
+        case '!':
+            if (match(lex, '=')) {
+                return make_token(TokenKind_BANG_EQUAL, .int_ = 0);
+            }
+
+            advance(lex);
+            return make_token(TokenKind_BANG, .int_ = 0);
+
+        case '^':
+            if (match(lex, '=')) {
+                return make_token(TokenKind_CARET_EQUAL, .int_ = 0);
+            }
+
+            advance(lex);
+            return make_token(TokenKind_CARET, .int_ = 0);
+
+        case '>':
+            if (match(lex, '=')) {
+                return make_token(TokenKind_GREATER_EQUAL, .int_ = 0);
+            } else if (match(lex, '>')) {
+                if (match(lex, '=')) {
+                    return make_token(TokenKind_GREATER_GREATER_EQUAL, .int_ = 0);
+                }
+
+                return make_token(TokenKind_GREATER_GREATER, .int_ = 0);
+            }
+
+            advance(lex);
+            return make_token(TokenKind_GREATER, .int_ = 0);
+
+
+        case '<':
+            if (match(lex, '=')) {
+                return make_token(TokenKind_LESS_EQUAL, .int_ = 0);
+            } else if (match(lex, '<')) {
+                if (match(lex, '=')) {
+                    return make_token(TokenKind_LESS_LESS_EQUAL, .int_ = 0);
+                }
+
+                return make_token(TokenKind_LESS_LESS, .int_ = 0);
+            }
+
+            advance(lex);
+            return make_token(TokenKind_LESS, .int_ = 0);
+
+        case '%':
+            if (match(lex, '=')) {            
+                return make_token(TokenKind_PERCENT_EQUAL, .int_ = 0);
+            }
+
+            advance(lex);
+            return make_token(TokenKind_PERCENT, .int_ = 0);
+
+        case '/':
+            if (match(lex, '=')) {        
+                return make_token(TokenKind_SLASH_EQUAL, .int_ = 0);
+            }
+
+            advance(lex);
+            return make_token(TokenKind_SLASH, .int_ = 0);
+
+        case '*':
+            if (match(lex, '=')) {        
+                return make_token(TokenKind_STAR_EQUAL, .int_ = 0);
+            }
+
+            advance(lex);
+            return make_token(TokenKind_STAR, .int_ = 0);
+        
         case '.':
+            if (match(lex,'.')) {
+                if (match(lex,'.')) {
+                    return make_token(TokenKind_DOT_DOT_DOT, .int_ = 0);
+                }
+
+                return make_token(TokenKind_DOT_DOT, .int_ = 0);
+            }
+
             advance(lex);
             return make_token(TokenKind_DOT, .int_ = 0);
 
         case '|':
+            if (match(lex, '|')) {
+                return make_token(TokenKind_PIPE_PIPE, .int_ = 0);
+            } else if (match(lex, '=')) {
+                return make_token(TokenKind_PIPE_EQUAL, .int_ = 0);
+            }
+
             advance(lex);
             return make_token(TokenKind_PIPE, .int_ = 0);
 
@@ -217,23 +353,37 @@ Token Lexer_next_token (Lexer* lex) {
             } else if (match(lex,'>')) {
                 return make_token(TokenKind_ARROW, .int_ = 0);
             }
+
+            advance(lex);
             return make_token(TokenKind_EQUAL, .int_ = 0);
 
         case '+':
+            if (match(lex, '+')) {
+                return make_token(TokenKind_PLUS_PLUS, .int_ = 0);
+            } else if (match(lex, '=')) {
+                return make_token(TokenKind_PIPE_EQUAL, .int_ = 0);
+            }
+
             advance(lex);
             return make_token(TokenKind_PLUS, .int_ = 0);
 
         case '-':
+            if (match(lex, '-')) {
+                return make_token(TokenKind_MINUS_MINUS, .int_ = 0);
+            } else if (match(lex, '=')) {
+                return make_token(TokenKind_MINUS_EQUAL, .int_ = 0);
+            }
+
             advance(lex);
             return make_token(TokenKind_MINUS, .int_ = 0);
 
         default:
-            printf("[ '%c' | %d ]\n",peek(lex),peek(lex));
+            WARN("invalid char [ '%c' | %d ]",peek(lex),peek(lex));
             advance(lex);
             break;
     }
 
-    return (Token) make_token(TokenKind_ERROR, .int_ = 0);
+    return make_token(TokenKind_ERROR, .int_ = 0);
 }
 
 #undef make_token
