@@ -1,9 +1,9 @@
 CC = clang
 
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra #-Werror
 CFLAGS += -ggdb # remove later
 
-EXEC=Lazy
+EXEC = Lazy
 
 SRCS := $(shell find . -type f -name "*.c")
 

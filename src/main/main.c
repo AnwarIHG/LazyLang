@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <getopt.h>
 
+#include "../common/logger.h"
+
 #include "main.h"
 #define VERSION "0.1.0"
 
@@ -120,37 +122,38 @@ static int compile(const CompilerConfig* config) {
                 // printf(" | ");
                 break;
             case TokenKind_EOF:
-                printf("\n\n\nat the end\n");
+                printf("\n\n\nat the end\n\n");
                 break;
             default:
                 break;
         }
     }
 
-    printf("lines: %d\n",lex->line);
-    printf("not read: %lu\n",lex->file.left);
-    printf("size: %lu\n",lex->file.size);
+
+    INFO("lines: %d",lex->line);
+    INFO("not read: %lu",lex->file.left);
+    INFO("size: %lu",lex->file.size);
 
     Lexer_term(lex);
 
-    printf("\n\033[1;33m⚠️  Lazy Lang Compiler - Work in Progress\033[0m\n");
+    INFO("\n\033[1;33m⚠️  Lazy Lang Compiler - Work in Progress\033[0m");
     printf("\n");
-    printf("Current Status:\n");
-    printf("  ⏳ Phase 1: Foundation & Infrastructure - PENDING\n");
-    printf("  ✅ Phase 2: Frontend - Lexer - COMPLETE\n");
-    printf("  ⏳ Phase 3: Frontend - Parser - PENDING\n");
-    printf("  ⏳ Phase 4: Middle-end - Type System - PENDING\n");
-    printf("  ⏳ Phase 5: Middle-end - Semantic Analysis - PENDING\n");
-    printf("  ⏳ Phase 6: Backend - FASM Code Generation - PENDING\n");
-    printf("  ⏳ Phase 7: Optimization Passes - PENDING\n");
-    printf("  ⏳ Phase 8: CUDA/GPU Integration - PENDING\n");
-    printf("  ⏳ Phase 9: FFI & Inline Assembly - PENDING\n");
-    printf("  ⏳ Phase 10: Standard Library - PENDING\n");
-    printf("  ⏳ Phase 11: Build System & CLI - PENDING\n");
-    printf("  ⏳ Phase 12: Testing & Benchmarking - PENDING\n");
+    INFO("Current Status:");
+    INFO("  ⏳ Phase 1: Foundation & Infrastructure - PENDING");
+    INFO("  ✅ Phase 2: Frontend - Lexer - COMPLETE");
+    INFO("  ⏳ Phase 3: Frontend - Parser - PENDING");
+    INFO("  ⏳ Phase 4: Middle-end - Type System - PENDING");
+    INFO("  ⏳ Phase 5: Middle-end - Semantic Analysis - PENDING");
+    INFO("  ⏳ Phase 6: Backend - FASM Code Generation - PENDING");
+    INFO("  ⏳ Phase 7: Optimization Passes - PENDING");
+    INFO("  ⏳ Phase 8: CUDA/GPU Integration - PENDING");
+    INFO("  ⏳ Phase 9: FFI & Inline Assembly - PENDING");
+    INFO("  ⏳ Phase 10: Standard Library - PENDING");
+    INFO("  ⏳ Phase 11: Build System & CLI - PENDING");
+    INFO("  ⏳ Phase 12: Testing & Benchmarking - PENDING");
     printf("\n");
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 int main (int argc, char* argv[]) {
